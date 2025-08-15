@@ -59,7 +59,8 @@ class OrderForm
                                     $set('currency', $product->currency);
                                 }
                             }
-                        }),
+                        })
+                        ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
 
                         TextInput::make('title')
                             ->dehydrated()
