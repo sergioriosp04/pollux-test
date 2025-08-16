@@ -29,6 +29,8 @@ class OrderForm
                     ->required()
                     ->columnSpanFull(),
 
+                Hidden::make('id'),
+
                 Repeater::make('orderProducts')
                     ->columnSpanFull()
                     ->relationship('orderProducts')
@@ -38,7 +40,7 @@ class OrderForm
                             name: 'product', 
                             titleAttribute: 'title',
                             modifyQueryUsing: fn ($query) => $query
-                                ->where('stock', '>', 0)
+                                // ->where('stock', '>', 0)
                                 ->where('status_id', ProductStatesCommon::ACTIVE)
                             )
                         ->required()
@@ -65,7 +67,11 @@ class OrderForm
                             ->minValue(1)
                             ->maxValue(function (Get $get) {
                                 $stock = $get('stock');
-                                if ($stock) {
+                                $isEditing = $get('id');
+                                if ($stock !== null) {
+                                    if ($isEditing) {
+                                        return $stock + $get('original_quantity');
+                                    }
                                     return $stock;
                                 }
                                 return 0;
@@ -76,11 +82,12 @@ class OrderForm
                             })
                             ->afterStateHydrated(function (Set $set, Get $get, $state) {
                                 self::setTotalsAccordingToQuantity($set, $get, $state);
+                                $set('original_quantity', $get('quantity'));
                             })
                             ->columnSpan(['default' => 2, 'md' => 1])
                             ->helperText(function (Get $get) {
                                 $stock = $get('stock');
-                                if ($stock) {
+                                if ($stock !== null) {
                                     return "Stock : {$stock}";
                                 }
                                 return 'First you should add a product';
@@ -92,6 +99,7 @@ class OrderForm
                             ->columnSpan(['default' => 2, 'md' => 1])
                             ->disabled(),
 
+                        Hidden::make('original_quantity'),
                         Hidden::make('total'),
                         Hidden::make('price'),
                         Hidden::make('unit_price'),

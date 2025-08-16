@@ -10,6 +10,19 @@ class EditOrder extends EditRecord
 {
     protected static string $resource = OrderResource::class;
 
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $order = $this->record;
+        foreach ($order->orderProducts as $orderProduct) {
+            if ($orderProduct->wasChanged('quantity')) {
+                $product = $orderProduct->product;
+                $product->stock += $orderProduct->getPrevious()['quantity'] - $orderProduct->quantity;
+                $product->save();
+            }
+        }
+        return $data;
+    }
+
     protected function getHeaderActions(): array
     {
         return [
