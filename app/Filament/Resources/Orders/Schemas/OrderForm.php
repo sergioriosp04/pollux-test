@@ -46,19 +46,10 @@ class OrderForm
                         ->live()
                         ->columnSpan(['default' => 2, 'md' => 1])
                         ->afterStateUpdated(function (Set $set, Get $get, $state) {
-                            if ($state) {
-                                $product = \App\Models\Product::find($state);
-                                
-                                if ($product) {
-                                    $set('price', $product->price);
-                                    $set('unit_price', $product->price);
-                                    $set('total', $product->price);
-                                    $set('total_price_display', number_format($product->price, 2));
-                                    $set('title', $product->title);
-                                    $set('stock', $product->stock);
-                                    $set('currency', $product->currency);
-                                }
-                            }
+                            self::getProductInfo($set, $get, $state);
+                        })
+                        ->afterStateHydrated(function (Set $set, Get $get, $state) {
+                            self::getProductInfo($set, $get, $state);
                         })
                         ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
 
@@ -81,12 +72,10 @@ class OrderForm
                             })
                             ->live()
                             ->afterStateUpdated(function (Set $set, Get $get, $state) {
-                                $stock = $get('stock');
-                                if ($state && $stock) {
-                                    $totalPrice = round((float) $state * $get('price'), 2);
-                                    $set('total', $totalPrice);
-                                    $set('total_price_display', number_format($totalPrice, 2));
-                                }
+                                self::setTotalsAccordingToQuantity($set, $get, $state);
+                            })
+                            ->afterStateHydrated(function (Set $set, Get $get, $state) {
+                                self::setTotalsAccordingToQuantity($set, $get, $state);
                             })
                             ->columnSpan(['default' => 2, 'md' => 1])
                             ->helperText(function (Get $get) {
@@ -100,7 +89,6 @@ class OrderForm
                         TextInput::make('total_price_display')
                             ->label('Total Price')
                             ->prefix('$')
-                            ->formatStateUsing(fn ($state) => $state ? number_format($state, 2) : '')
                             ->columnSpan(['default' => 2, 'md' => 1])
                             ->disabled(),
 
@@ -115,5 +103,30 @@ class OrderForm
                     ->defaultItems(1)
                     ->addActionLabel('Add product')
             ]);
+    }
+
+    private static function getProductInfo(Set $set, Get $get, $productId) {
+        if ($productId) {
+            $product = \App\Models\Product::find($productId);
+
+            if ($product) {
+                $set('price', $product->price);
+                $set('unit_price', $product->price);
+                $set('total', $product->price);
+                $set('total_price_display', number_format($product->price, 2));
+                $set('title', $product->title);
+                $set('stock', $product->stock);
+                $set('currency', $product->currency);
+            }
+        }
+    }
+
+    private static function setTotalsAccordingToQuantity(Set $set, Get $get, $quantity) {
+        $stock = $get('stock');
+        if ($quantity && $stock) {
+            $totalPrice = round((float) $quantity * $get('price'), 2);
+            $set('total', $totalPrice);
+            $set('total_price_display', number_format($totalPrice, 2));
+        }
     }
 }
