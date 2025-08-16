@@ -22,11 +22,4 @@ class EditOrder extends EditRecord
         }
         return $data;
     }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-        ];
-    }
 }
