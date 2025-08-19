@@ -2,9 +2,13 @@
 
 namespace App\Filament\Resources\Orders\Tables;
 
+use App\Enums\ExportFormat;
+use App\Services\Export\Exporters\OrderExporter;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -41,6 +45,27 @@ class OrdersTable
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->headerActions([
+                Action::make('export')
+                    ->label('Exportar')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->schema([
+                        Select::make('format')
+                            ->options(ExportFormat::getArrayOptions())
+                            ->default('json')
+                            ->required(),
+                    ])
+                    ->action(function(array $data) {
+                        $exporter = new OrderExporter();
+                        $result = $exporter->exportWithFormat($data['format']);
+                        
+                        return response()->streamDownload(
+                            fn() => print($result['content']),
+                            $result['filename'],
+                            ['Content-Type' => $result['contentType']]
+                        );
+                    }),
             ]);
     }
 }

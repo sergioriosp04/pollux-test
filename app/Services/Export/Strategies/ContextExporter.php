@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Export\Exporters;
+namespace App\Services\Export\Strategies;
 
 use App\Services\Export\Contracts\ExportInterface;
 use App\Services\Export\Contracts\ExportStrategyInterface;
