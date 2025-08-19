@@ -8,8 +8,18 @@ final class CsvExportStrategy implements ExportStrategyInterface
 {
     public function export(array $data): string
     {
-        // TODO: Implementation here
-        return '';
+        $output = fopen('php://temp', 'r+');
+        fputcsv($output, array_keys($data[0]));
+
+        foreach ($data as $row) {
+            fputcsv($output, $row);
+        }
+
+        rewind($output);
+        $csv = stream_get_contents($output);
+        fclose($output);
+        
+        return $csv;
     }
 
     public function getFileExtension(): string
