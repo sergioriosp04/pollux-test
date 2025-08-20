@@ -1,8 +1,50 @@
+## Steps for run:
+requirements: docker and docker compose
+
+## Linux
+### Step 1: copy .env.example to .env
+```bash
+cp .env.example .env
+```
+
+### Step 2: start the project
+```bash
+# Run in detached mode
+docker-compose up -d --build
+
+# To stop the containers
+docker-compose down
+
+# To view logs
+docker-compose logs -f
+
+# Stop containers
+docker-compose down
+```
+
+### Step 3: run migrations and seed
+```bash
+# Enter the container
+docker exec -it pollux-app bash
+
+# Inside the container, run:
+php artisan migrate --seed
+
+# Or directly without entering the container:
+docker exec pollux-app php artisan migrate --seed
+```
+
+### Step 4:
+You are now ready to use it.
+User register: http://localhost:8000/admin/register
+
+
+
 ## diagram db:
 
 ![alt text](image.png)
 ### see in = https://dbdiagram.io/d
-
+```
 Table users {
   id integer [primary key]
   username varchar
@@ -61,3 +103,4 @@ Table orders_products {
 
 Ref: orders_products.order_id > orders.id [delete: cascade]
 Ref: orders_products.product_id > products.id [delete: restrict]
+```
