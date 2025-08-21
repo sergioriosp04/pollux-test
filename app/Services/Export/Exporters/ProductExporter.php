@@ -20,7 +20,7 @@ class ProductExporter extends BaseExporterTemplate
                 'title' => $product->title,
                 'price' => $product->price,
                 'stock' => $product->stock ?? 0,
-                'currency' => $product->currency ? $product->currency->code : 'USD',
+                'currency' => $product->currency,
             ];
         })->toArray();
     }

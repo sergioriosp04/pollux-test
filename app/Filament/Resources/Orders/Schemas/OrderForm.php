@@ -65,6 +65,8 @@ class OrderForm
                             ->default(1)
                             ->required()
                             ->minValue(1)
+                            ->live()
+                            ->columnSpan(['default' => 2, 'md' => 1])
                             ->maxValue(function (Get $get) {
                                 $stock = $get('stock');
                                 $isEditing = $get('id');
@@ -76,15 +78,14 @@ class OrderForm
                                 }
                                 return 0;
                             })
-                            ->live()
                             ->afterStateUpdated(function (Set $set, Get $get, $state) {
                                 self::setTotalsAccordingToQuantity($set, $get, $state);
                             })
+                            // updated
                             ->afterStateHydrated(function (Set $set, Get $get, $state) {
                                 self::setTotalsAccordingToQuantity($set, $get, $state);
                                 $set('original_quantity', $get('quantity'));
                             })
-                            ->columnSpan(['default' => 2, 'md' => 1])
                             ->helperText(function (Get $get) {
                                 $stock = $get('stock');
                                 if ($stock !== null) {
