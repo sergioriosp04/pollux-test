@@ -2,7 +2,8 @@
 
 namespace App\Filament\Resources\Orders\Schemas;
 
-use App\Common\ProductStatesCommon;
+use App\Enums\OrderStatus;
+use App\Enums\ProductStatus;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
@@ -22,7 +23,12 @@ class OrderForm
                     ->columns(2)
                     ->required(),
                 Select::make('status_id')
-                    ->relationship('status', 'title')
+                    ->relationship(
+                        'status',
+                        'title',
+                        fn ($query) => $query
+                            ->whereNot('id', OrderStatus::CANCELED)
+                        )
                     ->columns(2)
                     ->required(),
                 Textarea::make('body')
@@ -33,7 +39,11 @@ class OrderForm
 
                 Repeater::make('orderProducts')
                     ->columnSpanFull()
+                    ->dehydrated() // Add fields to the request
+                    ->columns(2)
+                    ->defaultItems(1)
                     ->relationship('orderProducts')
+                    ->addActionLabel('Add product')
                     ->schema([
                         Select::make('product_id')
                         ->required()
@@ -45,7 +55,7 @@ class OrderForm
                             'product', 
                             'title',
                             fn ($query) => $query
-                                ->where('status_id', ProductStatesCommon::ACTIVE)
+                                ->where('status_id', ProductStatus::ACTIVE)
                             )
                         ->afterStateUpdated(function (Set $set, Get $get, $state) {
                             self::getProductInfo($set, $get, $state);
@@ -103,10 +113,6 @@ class OrderForm
                         Hidden::make('total'),
                         Hidden::make('unit_price'),
                     ])
-                    ->dehydrated() // Add fields to the request
-                    ->columns(2)
-                    ->defaultItems(1)
-                    ->addActionLabel('Add product')
             ]);
     }
 
