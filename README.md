@@ -39,6 +39,39 @@ You are now ready to use it.
 User register: http://localhost:8000/admin/register
 
 
+## Project app structure:
+```
+└── 📁app
+    └── 📁Enums
+    └── 📁Filament
+        └── 📁Pages
+            ├── Dashboard.php
+        └── 📁Resources
+            └── 📁Orders
+                └── 📁Pages
+                └── 📁Schemas
+                └── 📁Tables
+                ├── OrderResource.php
+            └── 📁Products
+                └── 📁Pages
+                └── 📁Schemas
+                └── 📁Tables
+                ├── ProductResource.php
+        └── 📁Widgets
+    └── 📁Http
+        └── 📁Controllers
+    └── 📁Models
+    └── 📁Providers
+        └── 📁Filament
+            ├── AdminPanelProvider.php
+        ├── AppServiceProvider.php
+    └── 📁Services
+        └── 📁Export
+            └── 📁Contracts
+            └── 📁Exporters
+            └── 📁Strategies
+```
+
 
 ## diagram db:
 

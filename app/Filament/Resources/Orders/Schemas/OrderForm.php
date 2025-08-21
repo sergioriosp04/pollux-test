@@ -39,7 +39,6 @@ class OrderForm
 
                 Repeater::make('orderProducts')
                     ->columnSpanFull()
-                    ->dehydrated() // Add fields to the request
                     ->columns(2)
                     ->defaultItems(1)
                     ->relationship('orderProducts')
@@ -113,6 +112,7 @@ class OrderForm
                         Hidden::make('total'),
                         Hidden::make('unit_price'),
                     ])
+                    ->dehydrated() // Add fields to the request
             ]);
     }
 
