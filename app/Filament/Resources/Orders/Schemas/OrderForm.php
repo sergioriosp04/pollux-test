@@ -36,29 +36,28 @@ class OrderForm
                     ->relationship('orderProducts')
                     ->schema([
                         Select::make('product_id')
-                        ->relationship(
-                            name: 'product', 
-                            titleAttribute: 'title',
-                            modifyQueryUsing: fn ($query) => $query
-                                // ->where('stock', '>', 0)
-                                ->where('status_id', ProductStatesCommon::ACTIVE)
-                            )
                         ->required()
                         ->searchable()
                         ->live()
                         ->columnSpan(['default' => 2, 'md' => 1])
+                        ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                        ->relationship(
+                            'product', 
+                            'title',
+                            fn ($query) => $query
+                                ->where('status_id', ProductStatesCommon::ACTIVE)
+                            )
                         ->afterStateUpdated(function (Set $set, Get $get, $state) {
                             self::getProductInfo($set, $get, $state);
                         })
+                        // for update action
                         ->afterStateHydrated(function (Set $set, Get $get, $state) {
                             self::getProductInfo($set, $get, $state);
-                        })
-                        ->disableOptionsWhenSelectedInSiblingRepeaterItems(),
+                        }),
 
                         TextInput::make('title')
-                            ->dehydrated()
-                            ->columnSpan(['default' => 2, 'md' => 1])
-                            ->required(),
+                            ->required()
+                            ->columnSpan(['default' => 2, 'md' => 1]),
                         
                         TextInput::make('quantity')
                             ->numeric()
@@ -81,7 +80,7 @@ class OrderForm
                             ->afterStateUpdated(function (Set $set, Get $get, $state) {
                                 self::setTotalsAccordingToQuantity($set, $get, $state);
                             })
-                            // updated
+                            // for update action
                             ->afterStateHydrated(function (Set $set, Get $get, $state) {
                                 self::setTotalsAccordingToQuantity($set, $get, $state);
                                 $set('original_quantity', $get('quantity'));
@@ -95,20 +94,17 @@ class OrderForm
                             }),
 
                         TextInput::make('total_price_display')
+                            ->disabled()
                             ->label('Total Price')
                             ->prefix('$')
-                            ->columnSpan(['default' => 2, 'md' => 1])
-                            ->disabled(),
+                            ->columnSpan(['default' => 2, 'md' => 1]),
 
-                        Hidden::make('original_quantity'),
+                        // it won´t add to the insert if it is not occulted
                         Hidden::make('total'),
-                        Hidden::make('price'),
                         Hidden::make('unit_price'),
-                        Hidden::make('stock'),
-                        Hidden::make('currency'),
                     ])
+                    ->dehydrated() // Add fields to the request
                     ->columns(2)
-                    ->dehydrated()
                     ->defaultItems(1)
                     ->addActionLabel('Add product')
             ]);
@@ -119,7 +115,6 @@ class OrderForm
             $product = \App\Models\Product::find($productId);
 
             if ($product) {
-                $set('price', $product->price);
                 $set('unit_price', $product->price);
                 $set('total', $product->price);
                 $set('total_price_display', number_format($product->price, 2));
@@ -133,7 +128,7 @@ class OrderForm
     private static function setTotalsAccordingToQuantity(Set $set, Get $get, $quantity) {
         $stock = $get('stock');
         if ($quantity && $stock) {
-            $totalPrice = round((float) $quantity * $get('price'), 2);
+            $totalPrice = round((float) $quantity * $get('unit_price'), 2);
             $set('total', $totalPrice);
             $set('total_price_display', number_format($totalPrice, 2));
         }
