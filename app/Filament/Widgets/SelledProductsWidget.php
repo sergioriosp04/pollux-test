@@ -28,7 +28,7 @@ class SelledProductsWidget extends ChartWidget
     private function getProductsSelled(): Collection
     {
         $productsSelled = DB::table('order_products', 'op')
-            ->selectRaw('op.product_id, products.title, COUNT(product_id) as total')
+            ->selectRaw('op.product_id, products.title, SUM(op.quantity) as total')
             ->join('products', 'op.product_id', '=', 'products.id')
             ->groupBy('products.id')
             ->get();
