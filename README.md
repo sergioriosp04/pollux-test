@@ -68,8 +68,8 @@ User register: http://localhost:8000/admin/register
     └── 📁Services
         └── 📁Export
             └── 📁Contracts
-            └── 📁Exporters
-            └── 📁Strategies
+            └── 📁Exporters // Template Method Pattern
+            └── 📁Strategies // Strategy Pattern
 ```
 
 
